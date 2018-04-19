@@ -319,11 +319,15 @@ std::string Route::buildReport() const
 
 Route::Route(std::string source, bool isFileName, metres granularity)
 {
+
+
     using namespace std;
     using namespace XML::Parser;
+
     string lat,lon,ele,name,temp,temp2;
-    metres deltaH,deltaV;
-    ostringstream oss,oss2;
+    metres deltaH,deltaV; //these variables could have a better name
+
+    ostringstream oss,oss2; //these variables could have a better name
     unsigned int num;
     this->granularity = granularity;
     if (isFileName){
@@ -357,7 +361,7 @@ Route::Route(std::string source, bool isFileName, metres granularity)
     temp = getElementContent(temp);
     if (elementExists(temp, "ele")) {
         temp2 = getElement(temp, "ele");
-        ele = getElementContent(temp2);
+        ele = getElementContent(temp2); //would it be better to have just ele = getElement(temp,"ele");
         Position startPos = Position(lat,lon,ele);
         positions.push_back(startPos);
         oss << "Position added: " << startPos.toString() << endl;
@@ -370,7 +374,7 @@ Route::Route(std::string source, bool isFileName, metres granularity)
     }
     if (elementExists(temp,"name")) {
         temp2 = getElement(temp,"name");
-        name = getElementContent(temp2);
+        name = getElementContent(temp2);//would it be better to have just name = getElement(temp,"name");
     }
     positionNames.push_back(name);
     Position prevPos = positions.back(), nextPos = positions.back();
@@ -382,7 +386,7 @@ Route::Route(std::string source, bool isFileName, metres granularity)
         lon = getElementAttribute(temp, "lon");
         temp = getElementContent(temp);
         if (elementExists(temp, "ele")) {
-            temp2 = getElement(temp, "ele");
+            temp2 = getElement(temp, "ele"); //would it be better to have just ele = getElement(temp,"ele");
             ele = getElementContent(temp2);
             nextPos = Position(lat,lon,ele);
         } else nextPos = Position(lat,lon);
@@ -390,7 +394,7 @@ Route::Route(std::string source, bool isFileName, metres granularity)
         else {
             if (elementExists(temp,"name")) {
                 temp2 = getElement(temp,"name");
-                name = getElementContent(temp2);
+                name = getElementContent(temp2); //would it be better to have just name = getElement(temp,"name");
             } else name = ""; // Fixed bug by adding this.
             positions.push_back(nextPos);
             positionNames.push_back(name);
