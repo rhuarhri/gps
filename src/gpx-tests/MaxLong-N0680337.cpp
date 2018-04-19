@@ -11,6 +11,7 @@ using namespace GPS;
 BOOST_AUTO_TEST_SUITE( Route_maxLongitude )
 
 const bool isFileName = true;
+/*
 // More test details in DesignOfUnitTests.pdf
 // Used boost check close to allow a tolerance when using floating points
 // Test increasing longitude values to identify that max longitude works
@@ -77,6 +78,6 @@ BOOST_AUTO_TEST_CASE( MaxPositiveToMaxNegativeLong )
    Route route = Route(LogFiles::GPXRoutesDir + "MaxPositiveToMaxNegative-N0680337.gpx", isFileName);
    BOOST_CHECK_CLOSE( route.maxLongitude(), 180, 0.1);
 }
-
+*/
 
 BOOST_AUTO_TEST_SUITE_END()

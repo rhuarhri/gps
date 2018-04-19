@@ -11,6 +11,8 @@ BOOST_AUTO_TEST_SUITE (Route_FindPosition)
 
 const bool isFileName = true;
 
+/*
+
 //-----------------------------------------------
 
 //Test1, CheckForPosition,
@@ -40,5 +42,7 @@ BOOST_AUTO_TEST_CASE( LowercaseMatch )
    Route route = Route(LogFiles::GPXRoutesDir + "N0689085Lowercase.gpx", isFileName);
    BOOST_CHECK_THROW( route.findPosition("l"), std::out_of_range );
 }
+
+*/
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -19,6 +19,8 @@ BOOST_AUTO_TEST_SUITE (N0719058_netHeightGain)
 
 const bool isFileName = true;
 
+/*
+
 //Test: Zero Net Elevation
 //Description: The route that I have specified QLHNR are all on the same plane and so the net elevation should equal 0. All positions on the route have an elevation of 38.
 BOOST_AUTO_TEST_CASE( zeroNetElevation )
@@ -80,5 +82,5 @@ BOOST_AUTO_TEST_CASE( increaseDecreaseElevation )
    BOOST_CHECK_EQUAL( route.totalHeightGain(), 60 );
 }
 
-
+*/
 BOOST_AUTO_TEST_SUITE_END()
