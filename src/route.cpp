@@ -319,7 +319,7 @@ std::string Route::buildReport() const
 
 Route::Route(std::string source, bool isFileName, metres granularity)
 {
-
+    //should have 56 errors
 
     using namespace std;
     using namespace XML::Parser;
@@ -327,57 +327,67 @@ Route::Route(std::string source, bool isFileName, metres granularity)
     string lat,lon,ele,name,temp,temp2;
     metres deltaH,deltaV; //these variables could have a better name
 
+    string line = "";
+
+    string rteptSource = "";
+
     ostringstream oss,oss2; //these variables could have a better name
-    unsigned int num;
+    unsigned int posistionsAmount = 0;
     this->granularity = granularity;
     if (isFileName){
         ifstream fs(source);
         if (! fs.good()) throw invalid_argument("Error opening source file '" + source + "'.");
         oss << "Source file '" << source << "' opened okay." << endl;
         while (fs.good()) {
-            getline(fs, temp);
-            oss2 << temp << endl;
+            getline(fs, line);
+            oss2 << line << endl;
         }
         source = oss2.str();
     }
     if (! elementExists(source,"gpx")) throw domain_error("No 'gpx' element.");
-    temp = getElement(source, "gpx");
-    source = getElementContent(temp);
+    /*temp = getElement(source, "gpx");
+    source = getElementContent(temp);*/
+    source = getElementContent(getElement(source, "gpx"));
     if (! elementExists(source,"rte")) throw domain_error("No 'rte' element.");
-    temp = getElement(source, "rte");
-    source = getElementContent(temp);
+    /*temp = getElement(source, "rte");
+    source = getElementContent(temp);*/
     if (elementExists(source, "name")) {
-        temp = getAndEraseElement(source, "name");
-        routeName = getElementContent(temp);
+        /*temp = getAndEraseElement(source, "name");
+        routeName = getElementContent(temp);*/
+        routeName = getElementContent(getAndEraseElement(source, "name"));
         oss << "Route name is: " << routeName << endl;
     }
-    num = 0;
+
     if (! elementExists(source,"rtept")) throw domain_error("No 'rtept' element.");
-    temp = getAndEraseElement(source, "rtept");
-    if (! attributeExists(temp,"lat")) throw domain_error("No 'lat' attribute.");
-    if (! attributeExists(temp,"lon")) throw domain_error("No 'lon' attribute.");
-    lat = getElementAttribute(temp, "lat");
-    lon = getElementAttribute(temp, "lon");
-    temp = getElementContent(temp);
+    rteptSource = getAndEraseElement(source, "rtept");
+    if (! attributeExists(rteptSource,"lat")) throw domain_error("No 'lat' attribute.");
+    if (! attributeExists(rteptSource,"lon")) throw domain_error("No 'lon' attribute.");
+    lat = getElementAttribute(rteptSource, "lat");
+    lon = getElementAttribute(rteptSource, "lon");
+
+    temp = getElementContent(rteptSource);
     if (elementExists(temp, "ele")) {
-        temp2 = getElement(temp, "ele");
-        ele = getElementContent(temp2); //would it be better to have just ele = getElement(temp,"ele");
+        /*temp2 = getElement(temp, "ele");
+        ele = getElementContent(temp2);*/ //would it be better to have just ele = getElement(temp,"ele");
+        ele = getElementContent(getElement(temp, "ele"));
         Position startPos = Position(lat,lon,ele);
         positions.push_back(startPos);
         oss << "Position added: " << startPos.toString() << endl;
-        ++num;
+        ++posistionsAmount;
     } else {
         Position startPos = Position(lat,lon);
         positions.push_back(startPos);
         oss << "Position added: " << startPos.toString() << endl;
-        ++num;
+        ++posistionsAmount;
     }
     if (elementExists(temp,"name")) {
-        temp2 = getElement(temp,"name");
-        name = getElementContent(temp2);//would it be better to have just name = getElement(temp,"name");
+        /*temp2 = getElement(temp,"name");
+        name = getElementContent(temp2);*///would it be better to have just name = getElement(temp,"name");
+        name = getElementContent(getElement(temp,"name"));
     }
     positionNames.push_back(name);
     Position prevPos = positions.back(), nextPos = positions.back();
+
     while (elementExists(source, "rtept")) {
         temp = getAndEraseElement(source, "rtept");
         if (! attributeExists(temp,"lat")) throw domain_error("No 'lat' attribute.");
@@ -386,26 +396,28 @@ Route::Route(std::string source, bool isFileName, metres granularity)
         lon = getElementAttribute(temp, "lon");
         temp = getElementContent(temp);
         if (elementExists(temp, "ele")) {
-            temp2 = getElement(temp, "ele"); //would it be better to have just ele = getElement(temp,"ele");
-            ele = getElementContent(temp2);
+            /*temp2 = getElement(temp, "ele"); //would it be better to have just ele = getElement(temp,"ele");
+            ele = getElementContent(temp2);*/
+            ele = getElementContent(getElement(temp, "ele"));
             nextPos = Position(lat,lon,ele);
         } else nextPos = Position(lat,lon);
         if (areSameLocation(nextPos, prevPos)) oss << "Position ignored: " << nextPos.toString() << endl;
         else {
             if (elementExists(temp,"name")) {
-                temp2 = getElement(temp,"name");
-                name = getElementContent(temp2); //would it be better to have just name = getElement(temp,"name");
+                /*temp2 = getElement(temp,"name");
+                name = getElementContent(temp2);*/ //would it be better to have just name = getElement(temp,"name");
+                name = getElementContent(getElement(temp,"name"));
             } else name = ""; // Fixed bug by adding this.
             positions.push_back(nextPos);
             positionNames.push_back(name);
             oss << "Position added: " << nextPos.toString() << endl;
-            ++num;
+            ++posistionsAmount;
             prevPos = nextPos;
         }
     }
-    oss << num << " positions added." << endl;
+    oss << posistionsAmount << " positions added." << endl;
     routeLength = 0;
-    for (unsigned int i = 1; i < num; ++i ) {
+    for (unsigned int i = 1; i < posistionsAmount; ++i ) {
         deltaH = distanceBetween(positions[i-1], positions[i]);
         deltaV = positions[i-1].elevation() - positions[i].elevation();
         routeLength += sqrt(pow(deltaH,2) + pow(deltaV,2));
