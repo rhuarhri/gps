@@ -331,13 +331,13 @@ Route::Route(std::string source, bool isFileName, metres granularity)
 
     string rteptSource = "";
 
-    ostringstream oss,oss2; //these variables could have a better name
+    ostringstream displayInfo,oss2; //these variables could have a better name
     unsigned int posistionsAmount = 0;
     this->granularity = granularity;
     if (isFileName){
         ifstream fs(source);
         if (! fs.good()) throw invalid_argument("Error opening source file '" + source + "'.");
-        oss << "Source file '" << source << "' opened okay." << endl;
+        displayInfo << "Source file '" << source << "' opened okay." << endl;
         while (fs.good()) {
             getline(fs, line);
             oss2 << line << endl;
@@ -355,7 +355,7 @@ Route::Route(std::string source, bool isFileName, metres granularity)
         /*temp = getAndEraseElement(source, "name");
         routeName = getElementContent(temp);*/
         routeName = getElementContent(getAndEraseElement(source, "name"));
-        oss << "Route name is: " << routeName << endl;
+        displayInfo << "Route name is: " << routeName << endl;
     }
 
     if (! elementExists(source,"rtept")) throw domain_error("No 'rtept' element.");
@@ -372,7 +372,7 @@ Route::Route(std::string source, bool isFileName, metres granularity)
         ele = getElementContent(getElement(temp, "ele"));
         Position startPos = Position(lat,lon,ele);
         positions.push_back(startPos);
-        oss << "Position added: " << startPos.toString() << endl;
+        displayInfo << "Position added: " << startPos.toString() << endl;
         ++posistionsAmount;
     } else {
         Position startPos = Position(lat,lon);
@@ -415,7 +415,7 @@ Route::Route(std::string source, bool isFileName, metres granularity)
             prevPos = nextPos;
         }
     }
-    oss << posistionsAmount << " positions added." << endl;
+    displayInfo << posistionsAmount << " positions added." << endl;
     routeLength = 0;
     for (unsigned int i = 1; i < posistionsAmount; ++i ) {
         deltaH = distanceBetween(positions[i-1], positions[i]);
