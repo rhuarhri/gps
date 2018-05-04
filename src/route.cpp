@@ -317,112 +317,118 @@ std::string Route::buildReport() const
     return report;
 }
 
-Route::Route(std::string source, bool isFileName, metres granularity)
+Route::Route(std::string sourceFile, bool isFileName, metres granularity)
 {
     //should have 56 errors
 
-    using namespace std;
+    using namespace std; //what is the std class used for?
     using namespace XML::Parser;
 
-    string lat,lon,ele,name,temp,temp2;
-    metres deltaH,deltaV; //these variables could have a better name
 
-    string line = "";
-
-    string rteptSource = "";
-
-    ostringstream displayInfo,oss2; //these variables could have a better name
+    ostringstream reportInfo,fileOutput; /*these variables were changed from oss and oss2 because
+                                            these name do not discribe what they do*/
     unsigned int posistionsAmount = 0;
     this->granularity = granularity;
+    string InFile  = "";
     if (isFileName){
-        ifstream fs(source);
-        if (! fs.good()) throw invalid_argument("Error opening source file '" + source + "'.");
-        displayInfo << "Source file '" << source << "' opened okay." << endl;
+        ifstream fs(sourceFile);
+        if (! fs.good()) throw invalid_argument("Error opening source file '" + sourceFile + "'.");
+        reportInfo << "Source file '" << sourceFile << "' opened okay." << endl;
+        string line = "";//why here because it is only used hear
         while (fs.good()) {
             getline(fs, line);
-            oss2 << line << endl;
+            fileOutput << line << endl;
         }
-        source = oss2.str();
+        InFile = fileOutput.str();
     }
-    if (! elementExists(source,"gpx")) throw domain_error("No 'gpx' element.");
+    if (! elementExists(InFile,"gpx")) throw domain_error("No 'gpx' element.");
     /*temp = getElement(source, "gpx");
-    source = getElementContent(temp);*/
-    source = getElementContent(getElement(source, "gpx"));
-    if (! elementExists(source,"rte")) throw domain_error("No 'rte' element.");
+    source = getElementContent(temp); was changed to the code below as both do the smae thing*/
+    string InGPX = getElementContent(getElement(InFile, "gpx"));
+    if (! elementExists(InGPX,"rte")) throw domain_error("No 'rte' element.");
     /*temp = getElement(source, "rte");
     source = getElementContent(temp);*/
-    if (elementExists(source, "name")) {
+    string InRTE = getElementContent(getElement(InGPX, "rte"));
+    if (elementExists(InRTE, "name")) {
         /*temp = getAndEraseElement(source, "name");
         routeName = getElementContent(temp);*/
-        routeName = getElementContent(getAndEraseElement(source, "name"));
-        displayInfo << "Route name is: " << routeName << endl;
+        routeName = getElementContent(getAndEraseElement(InRTE, "name"));
+        reportInfo << "Route name is: " << routeName << endl;
     }
 
-    if (! elementExists(source,"rtept")) throw domain_error("No 'rtept' element.");
-    rteptSource = getAndEraseElement(source, "rtept");
+
+    string lat,lon,ele,name;//these variables were moved as they are only used from here on
+    if (! elementExists(InRTE,"rtept")) throw domain_error("No 'rtept' element.");
+    string rteptSource = "";
+    rteptSource = getAndEraseElement(InRTE, "rtept");
     if (! attributeExists(rteptSource,"lat")) throw domain_error("No 'lat' attribute.");
     if (! attributeExists(rteptSource,"lon")) throw domain_error("No 'lon' attribute.");
     lat = getElementAttribute(rteptSource, "lat");
     lon = getElementAttribute(rteptSource, "lon");
 
-    temp = getElementContent(rteptSource);
-    if (elementExists(temp, "ele")) {
+    string rteptData = "";
+    rteptData = getElementContent(rteptSource);
+    if (elementExists(rteptData, "ele")) {
         /*temp2 = getElement(temp, "ele");
         ele = getElementContent(temp2);*/ //would it be better to have just ele = getElement(temp,"ele");
-        ele = getElementContent(getElement(temp, "ele"));
+        ele = getElementContent(getElement(rteptData, "ele"));
         Position startPos = Position(lat,lon,ele);
         positions.push_back(startPos);
-        displayInfo << "Position added: " << startPos.toString() << endl;
+        reportInfo << "Position added: " << startPos.toString() << endl;
         ++posistionsAmount;
     } else {
         Position startPos = Position(lat,lon);
         positions.push_back(startPos);
-        oss << "Position added: " << startPos.toString() << endl;
+        reportInfo << "Position added: " << startPos.toString() << endl;
         ++posistionsAmount;
     }
-    if (elementExists(temp,"name")) {
+    if (elementExists(rteptData,"name")) {
         /*temp2 = getElement(temp,"name");
         name = getElementContent(temp2);*///would it be better to have just name = getElement(temp,"name");
-        name = getElementContent(getElement(temp,"name"));
+        name = getElementContent(getElement(rteptData,"name"));
     }
     positionNames.push_back(name);
     Position prevPos = positions.back(), nextPos = positions.back();
 
-    while (elementExists(source, "rtept")) {
-        temp = getAndEraseElement(source, "rtept");
-        if (! attributeExists(temp,"lat")) throw domain_error("No 'lat' attribute.");
-        if (! attributeExists(temp,"lon")) throw domain_error("No 'lon' attribute.");
-        lat = getElementAttribute(temp, "lat");
-        lon = getElementAttribute(temp, "lon");
-        temp = getElementContent(temp);
-        if (elementExists(temp, "ele")) {
+    string fileData = "";
+    while (elementExists(InRTE, "rtept")) {
+        fileData = getAndEraseElement(InRTE, "rtept");
+        if (! attributeExists(fileData,"lat")) throw domain_error("No 'lat' attribute.");
+        if (! attributeExists(fileData,"lon")) throw domain_error("No 'lon' attribute.");
+        lat = getElementAttribute(fileData, "lat");
+        lon = getElementAttribute(fileData, "lon");
+        string fileContent = "";
+        fileContent = getElementContent(fileData);
+        if (elementExists(fileContent, "ele")) {
             /*temp2 = getElement(temp, "ele"); //would it be better to have just ele = getElement(temp,"ele");
             ele = getElementContent(temp2);*/
-            ele = getElementContent(getElement(temp, "ele"));
+            ele = getElementContent(getElement(fileContent, "ele"));
             nextPos = Position(lat,lon,ele);
         } else nextPos = Position(lat,lon);
-        if (areSameLocation(nextPos, prevPos)) oss << "Position ignored: " << nextPos.toString() << endl;
+        if (areSameLocation(nextPos, prevPos)) reportInfo << "Position ignored: " << nextPos.toString() << endl;
         else {
-            if (elementExists(temp,"name")) {
+            if (elementExists(fileContent,"name")) {
                 /*temp2 = getElement(temp,"name");
                 name = getElementContent(temp2);*/ //would it be better to have just name = getElement(temp,"name");
-                name = getElementContent(getElement(temp,"name"));
+                name = getElementContent(getElement(fileContent,"name"));
             } else name = ""; // Fixed bug by adding this.
             positions.push_back(nextPos);
             positionNames.push_back(name);
-            oss << "Position added: " << nextPos.toString() << endl;
+            reportInfo << "Position added: " << nextPos.toString() << endl;
             ++posistionsAmount;
             prevPos = nextPos;
         }
     }
-    displayInfo << posistionsAmount << " positions added." << endl;
+    reportInfo << posistionsAmount << " positions added." << endl;
+
     routeLength = 0;
+    metres flatDistance,elevationBetweenPoints;
     for (unsigned int i = 1; i < posistionsAmount; ++i ) {
-        deltaH = distanceBetween(positions[i-1], positions[i]);
-        deltaV = positions[i-1].elevation() - positions[i].elevation();
-        routeLength += sqrt(pow(deltaH,2) + pow(deltaV,2));
+        flatDistance = distanceBetween(positions[i-1], positions[i]);
+        elevationBetweenPoints = positions[i-1].elevation() - positions[i].elevation();
+        routeLength += sqrt(pow(flatDistance,2) + pow(elevationBetweenPoints,2));
     }
-    report = oss.str();
+    report = reportInfo.str();
 }
 
 void Route::setGranularity(metres granularity)

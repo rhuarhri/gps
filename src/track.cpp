@@ -125,7 +125,7 @@
 
 
 
-    Track::Track(std::string source, bool isFileName, metres granularity)
+    Track::Track(std::string sourceFile, bool isFileName, metres granularity)
 
     {
 
@@ -135,63 +135,65 @@
 
         string mergedTrkSegs,trkseg,lat,lon,ele,name,time,temp,temp2;
 
-        metres deltaH,deltaV;
+        //metres deltaH,deltaV;
 
         seconds startTime, currentTime, timeElapsed;
 
-        ostringstream oss,oss2;
+        ostringstream reportInfo,oss2;
 
-        unsigned int num;
+        string InFile = "";
 
         this->granularity = granularity;
 
         if (isFileName) {
 
-            ifstream fs(source);
+            ifstream fs(sourceFile);
 
-            if (! fs.good()) throw invalid_argument("Error opening source file '" + source + "'.");
+            if (! fs.good()) throw invalid_argument("Error opening source file '" + sourceFile + "'.");
 
-            oss << "Source file '" << source << "' opened okay." << endl;
+            reportInfo << "Source file '" << sourceFile << "' opened okay." << endl;
+
+            string line = "";
 
             while (fs.good()) {
 
-                getline(fs, temp);
+                getline(fs, line);
 
-                oss2 << temp << endl;
+                oss2 << line << endl;
 
             }
 
-            source = oss2.str();
+            InFile = oss2.str();
 
         }
 
-        if (! elementExists(source,"gpx")) throw domain_error("No 'gpx' element.");
+        if (! elementExists(InFile,"gpx")) throw domain_error("No 'gpx' element.");
 
-        temp = getElement(source, "gpx");
+        //temp = getElement(source, "gpx");
 
-        source = getElementContent(temp);
+        string source = getElementContent(getElement(InFile, "gpx"));
 
         if (! elementExists(source,"trk")) throw domain_error("No 'trk' element.");
 
-        temp = getElement(source, "trk");
+        //temp = getElement(source, "trk");
 
-        source = getElementContent(temp);
+        source = getElementContent(getElement(source, "trk"));
 
         if (elementExists(source, "name")) {
 
-            temp = getAndEraseElement(source, "name");
+            //temp = getAndEraseElement(source, "name");
 
-            routeName = getElementContent(temp);
+            routeName = getElementContent(getAndEraseElement(source, "name"));
 
-            oss << "Track name is: " << routeName << endl;
+            reportInfo << "Track name is: " << routeName << endl;
 
         }
 
         while (elementExists(source, "trkseg")) {
 
-            temp = getAndEraseElement(source, "trkseg");
+            //temp = getAndEraseElement(source, "trkseg");
 
-            trkseg = getElementContent(temp);
+            trkseg = getElementContent(getAndEraseElement(source, "trkseg"));
 
             getAndEraseElement(trkseg, "name");
 
@@ -201,7 +203,7 @@
 
         if (! mergedTrkSegs.empty()) source = mergedTrkSegs;
 
-        num = 0;
+        unsigned int num = 0;
 
         if (! elementExists(source,"trkpt")) throw domain_error("No 'trkpt' element.");
 
@@ -219,15 +221,15 @@
 
         if (elementExists(temp, "ele")) {
 
-            temp2 = getElement(temp, "ele");
+            //temp2 = getElement(temp, "ele");
 
-            ele = getElementContent(temp2);
+            ele = getElementContent(getElement(temp, "ele"));
 
             Position startPos = Position(lat,lon,ele);
 
             positions.push_back(startPos);
 
-            oss << "Start position added: " << startPos.toString() << endl;
+            reportInfo << "Start position added: " << startPos.toString() << endl;
 
             ++num;
 
@@ -237,7 +239,7 @@
 
             positions.push_back(startPos);
 
-            oss << "Start position added: " << startPos.toString() << endl;
+            reportInfo << "Start position added: " << startPos.toString() << endl;
 
             ++num;
 
@@ -245,9 +247,9 @@
 
         if (elementExists(temp,"name")) {
 
-            temp2 = getElement(temp,"name");
+            //temp2 = getElement(temp,"name");
 
-            name = getElementContent(temp2);
+            name = getElementContent(getElement(temp,"name"));
 
         }
 
@@ -259,9 +261,9 @@
 
         if (! elementExists(temp,"time")) throw domain_error("No 'time' element.");
 
-        temp2 = getElement(temp,"time");
+        //temp2 = getElement(temp,"time");
 
-        time = getElementContent(temp2);
+        time = getElementContent(getElement(temp,"time"));
 
         startTime = currentTime = stringToTime(time);
 
@@ -283,9 +285,9 @@
 
             if (elementExists(temp, "ele")) {
 
-                temp2 = getElement(temp, "ele");
+                //temp2 = getElement(temp, "ele");
 
-                ele = getElementContent(temp2);
+                ele = getElementContent(getElement(temp, "ele"));
 
                 nextPos = Position(lat,lon,ele);
 
@@ -293,9 +295,9 @@
 
             if (! elementExists(temp,"time")) throw domain_error("No 'time' element.");
 
-            temp2 = getElement(temp,"time");
+            //temp2 = getElement(temp,"time");
 
-            time = getElementContent(temp2);
+            time = getElementContent(getElement(temp,"time"));
 
             currentTime = stringToTime(time);
 
@@ -305,15 +307,15 @@
 
                 departed.back() = currentTime - startTime;
 
-                oss << "Position ignored: " << nextPos.toString() << endl;
+                reportInfo << "Position ignored: " << nextPos.toString() << endl;
 
             } else {
 
                 if (elementExists(temp,"name")) {
 
-                    temp2 = getElement(temp,"name");
+                    //temp2 = getElement(temp,"name");
 
-                    name = getElementContent(temp2);
+                    name = getElementContent(getElement(temp,"name"));
 
                 } else name = ""; // Fixed bug by adding this.
 
@@ -327,9 +329,9 @@
 
                 departed.push_back(timeElapsed);
 
-                oss << "Position added: " << nextPos.toString() << endl;
+                reportInfo << "Position added: " << nextPos.toString() << endl;
 
-                oss << " at time: " << to_string(timeElapsed) << endl;
+                reportInfo << " at time: " << to_string(timeElapsed) << endl;
 
                 ++num;
 
@@ -339,21 +341,23 @@
 
         }
 
-        oss << num << " positions added." << endl;
+        reportInfo << num << " positions added." << endl;
 
         routeLength = 0;
 
+        metres flatDistance, elevationBetweenPoints;
+
         for (unsigned int i = 1; i < num; ++i ) {
 
-            deltaH = distanceBetween(positions[i-1], positions[i]);
+            flatDistance = distanceBetween(positions[i-1], positions[i]);
 
-            deltaV = positions[i-1].elevation() - positions[i].elevation();
+            elevationBetweenPoints = positions[i-1].elevation() - positions[i].elevation();
 
-            routeLength += sqrt(pow(deltaH,2) + pow(deltaV,2));
+            routeLength += sqrt(pow(flatDistance,2) + pow(elevationBetweenPoints,2));
 
         }
 
-        report = oss.str();
+        report = reportInfo.str();
 
     }
 
