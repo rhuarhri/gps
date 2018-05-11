@@ -359,9 +359,12 @@ Route::Route(std::string sourceFile, bool isFileName, metres granularity)
 
     string lat,lon,ele,name;//these variables were moved as they are only used from here on
     if (! elementExists(InRTE,"rtept")) throw domain_error("No 'rtept' element.");
-    string rteptSource = "";
-    rteptSource = getAndEraseElement(InRTE, "rtept");
-    if (! attributeExists(rteptSource,"lat")) throw domain_error("No 'lat' attribute.");
+    string routePoint = getAndEraseElement(InRTE, "rtept");
+
+    Position startPos = getPosition(routePoint);
+
+
+    /*if (! attributeExists(rteptSource,"lat")) throw domain_error("No 'lat' attribute.");
     if (! attributeExists(rteptSource,"lon")) throw domain_error("No 'lon' attribute.");
     lat = getElementAttribute(rteptSource, "lat");
     lon = getElementAttribute(rteptSource, "lon");
@@ -370,7 +373,7 @@ Route::Route(std::string sourceFile, bool isFileName, metres granularity)
     rteptData = getElementContent(rteptSource);
     if (elementExists(rteptData, "ele")) {
         /*temp2 = getElement(temp, "ele");
-        ele = getElementContent(temp2);*/ //would it be better to have just ele = getElement(temp,"ele");
+        ele = getElementContent(temp2);* //would it be better to have just ele = getElement(temp,"ele");
         ele = getElementContent(getElement(rteptData, "ele"));
         Position startPos = Position(lat,lon,ele);
         positions.push_back(startPos);
@@ -381,13 +384,20 @@ Route::Route(std::string sourceFile, bool isFileName, metres granularity)
         positions.push_back(startPos);
         reportInfo << "Position added: " << startPos.toString() << endl;
         ++posistionsAmount;
-    }
+    }*
     if (elementExists(rteptData,"name")) {
         /*temp2 = getElement(temp,"name");
-        name = getElementContent(temp2);*///would it be better to have just name = getElement(temp,"name");
+        name = getElementContent(temp2);* //would it be better to have just name = getElement(temp,"name");
         name = getElementContent(getElement(rteptData,"name"));
     }
-    positionNames.push_back(name);
+    positionNames.push_back(name);*/
+
+    positions.push_back(startPos);
+    reportInfo << "Position added: " << startPos.toString() << endl;
+    ++posistionsAmount;
+
+    addName(routePoint);
+
     Position prevPos = positions.back(), nextPos = positions.back();
 
     string fileData = "";
@@ -429,6 +439,56 @@ Route::Route(std::string sourceFile, bool isFileName, metres granularity)
         routeLength += sqrt(pow(flatDistance,2) + pow(elevationBetweenPoints,2));
     }
     report = reportInfo.str();
+}
+
+void Route::addName(std::string source)
+{
+
+    std::string name = "";
+
+    std::string Content = XML::Parser::getElementContent(source);
+
+    if (XML::Parser::elementExists(Content,"name")) {
+                /*temp2 = getElement(temp,"name");
+                name = getElementContent(temp2);*/ //would it be better to have just name = getElement(temp,"name");
+                name = XML::Parser::getElementContent(XML::Parser::getElement(Content,"name"));
+            }
+            /**/
+
+    positionNames.push_back(name);
+
+}
+
+Position Route::getPosition(std::string source)
+{
+
+    if (! XML::Parser::attributeExists(source,"lat")) throw std::domain_error("No 'lat' attribute.");
+    if (! XML::Parser::attributeExists(source,"lon")) throw std::domain_error("No 'lon' attribute.");
+
+    std::string lat = XML::Parser::getElementAttribute(source, "lat");
+    std::string lon = XML::Parser::getElementAttribute(source, "lon");
+
+    /*string rteptData = "";
+    rteptData = getElementContent(rteptSource);*/
+    std::string elevationData = XML::Parser::getElementContent(source);
+
+    if (XML::Parser::elementExists(elevationData, "ele")) {
+        /*temp2 = getElement(temp, "ele");
+        ele = getElementContent(temp2);*/ //would it be better to have just ele = getElement(temp,"ele");
+        std::string ele = XML::Parser::getElementContent(XML::Parser::getElement(elevationData, "ele"));
+
+        Position foundPosition = Position(lat,lon,ele);
+        return foundPosition;
+    }
+    else
+    {
+        Position foundPosition = Position(lat,lon);
+        return foundPosition;
+
+    }
+
+
+
 }
 
 void Route::setGranularity(metres granularity)
