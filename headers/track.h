@@ -52,6 +52,8 @@ namespace GPS
       speed maxRateOfDescent() const;
 
     protected:
+      Position getPosition(std::string source);
+
       /* These vectors store the arrival time and departure time at each
        * Position in the Track.  These times are relative to the start of
        * the Track; thus arrived[0] is always 0.

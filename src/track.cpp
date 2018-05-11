@@ -207,7 +207,11 @@
 
         if (! elementExists(source,"trkpt")) throw domain_error("No 'trkpt' element.");
 
-        temp = getAndEraseElement(source, "trkpt");
+        string trackPosition = getAndEraseElement(source, "trkpt");
+
+
+
+        /*temp = getAndEraseElement(source, "trkpt");
 
         if (! attributeExists(temp,"lat")) throw domain_error("No 'lat' attribute.");
 
@@ -243,7 +247,17 @@
 
             ++num;
 
-        }
+        }*/
+
+        Position startPos = getPosition(trackPosition);
+
+        positions.push_back(startPos);
+
+        reportInfo << "Start position added: " << startPos.toString() << endl;
+
+        ++num;
+
+        temp = getElementContent(trackPosition);
 
         if (elementExists(temp,"name")) {
 
@@ -361,7 +375,38 @@
 
     }
 
+    Position Track::getPosition(string source)
+    {
 
+
+        if (! XML::Parser::attributeExists(source,"lat")) throw std::domain_error("No 'lat' attribute.");
+
+        if (! XML::Parser::attributeExists(source,"lon")) throw std::domain_error("No 'lon' attribute.");
+
+        std::string lat = XML::Parser::getElementAttribute(source, "lat");
+
+        std::string lon = XML::Parser::getElementAttribute(source, "lon");
+
+        std::string elevationSource = XML::Parser::getElementContent(source);
+
+            if (XML::Parser::elementExists(elevationSource, "ele")) {
+
+                //temp2 = getElement(temp, "ele");
+
+                std::string ele = XML::Parser::getElementContent(XML::Parser::getElement(elevationSource, "ele"));
+
+                Position foundPosition = Position(lat,lon,ele);
+
+                return foundPosition;
+
+            } else
+            {
+                Position foundPosition = Position(lat,lon);
+
+                return foundPosition;
+            }
+
+    }
 
     void Track::setGranularity(metres granularity)
 
