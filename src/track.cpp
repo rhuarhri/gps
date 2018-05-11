@@ -273,13 +273,13 @@
 
         departed.push_back(0);
 
-        if (! elementExists(temp,"time")) throw domain_error("No 'time' element.");
+        //if (! elementExists(temp,"time")) throw domain_error("No 'time' element.");
 
         //temp2 = getElement(temp,"time");
 
-        time = getElementContent(getElement(temp,"time"));
+        //time = getElementContent(getElement(temp,"time"));
 
-        startTime = currentTime = stringToTime(time);
+        startTime = currentTime = getTime(trackPosition);//stringToTime(time);
 
         Position prevPos = positions.back(), nextPos = positions.back();
 
@@ -312,15 +312,15 @@
 
             nextPos = getPosition(trackPosition);
 
-            temp = getElementContent(trackPosition);
+            //temp = getElementContent(trackPosition);
 
-            if (! elementExists(temp,"time")) throw domain_error("No 'time' element.");
+            //if (! elementExists(temp,"time")) throw domain_error("No 'time' element.");
 
             //temp2 = getElement(temp,"time");
 
-            time = getElementContent(getElement(temp,"time"));
+            //time = getElementContent(getElement(temp,"time"));
 
-            currentTime = stringToTime(time);
+            currentTime = getTime(trackPosition);//stringToTime(time);
 
             if (areSameLocation(nextPos, prevPos)) {
 
@@ -412,6 +412,20 @@
 
                 return foundPosition;
             }
+
+    }
+
+    seconds Track::getTime(std::string source)
+    {
+        std::string content = "";
+
+        content = XML::Parser::getElementContent(source);
+
+        if (! XML::Parser::elementExists(content,"time")) throw std::domain_error("No 'time' element.");
+
+        std::string time = XML::Parser::getElementContent(XML::Parser::getElement(content,"time"));
+
+        return stringToTime(time);
 
     }
 
