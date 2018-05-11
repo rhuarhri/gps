@@ -268,10 +268,10 @@
             name = getElementContent(getElement(temp,"name"));
 
         }
+*/
+        positionNames.push_back(addName(trackPosition));
 
-        positionNames.push_back(name);*/
 
-        addName(trackPosition);
 
         arrived.push_back(0);
 
@@ -344,11 +344,11 @@
 
                 } else name = ""; // Fixed bug by adding this.*/
 
-                addName(trackPosition);
+
 
                 positions.push_back(nextPos);
 
-                positionNames.push_back(name);
+                positionNames.push_back(addName(trackPosition));
 
                 timeElapsed = currentTime - startTime;
 
@@ -435,7 +435,7 @@
 
     }
 
-    void Track::addName(std::string source)
+    std::string Track::addName(std::string source)
     {
         std::string name = "";
 
@@ -450,7 +450,7 @@
 
         }
 
-        positionNames.push_back(name);
+        return name;
 
     }
 
