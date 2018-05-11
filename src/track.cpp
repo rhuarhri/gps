@@ -285,7 +285,10 @@
 
         while (elementExists(source, "trkpt")) {
 
-            temp = getAndEraseElement(source, "trkpt");
+            string trackPosition = getAndEraseElement(source, "trkpt");
+
+            /*temp = getAndEraseElement(source, "trkpt");
+
 
             if (! attributeExists(temp,"lat")) throw domain_error("No 'lat' attribute.");
 
@@ -305,7 +308,11 @@
 
                 nextPos = Position(lat,lon,ele);
 
-            } else nextPos = Position(lat,lon);
+            } else nextPos = Position(lat,lon);*/
+
+            nextPos = getPosition(trackPosition);
+
+            temp = getElementContent(trackPosition);
 
             if (! elementExists(temp,"time")) throw domain_error("No 'time' element.");
 
