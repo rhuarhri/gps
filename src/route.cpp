@@ -374,31 +374,13 @@ Route::Route(std::string sourceFile, bool isFileName, metres granularity)
 
         fileData = getAndEraseElement(InRTE, "rtept");
 
-        /*
-
-        if (! attributeExists(fileData,"lat")) throw domain_error("No 'lat' attribute.");
-        if (! attributeExists(fileData,"lon")) throw domain_error("No 'lon' attribute.");
-        lat = getElementAttribute(fileData, "lat");
-        lon = getElementAttribute(fileData, "lon");
-        string fileContent = "";
-        fileContent = getElementContent(fileData);
-        if (elementExists(fileContent, "ele")) {
-            /*temp2 = getElement(temp, "ele"); //would it be better to have just ele = getElement(temp,"ele");
-            ele = getElementContent(temp2);*
-            ele = getElementContent(getElement(fileContent, "ele"));
-            nextPos = Position(lat,lon,ele);
-        } else nextPos = Position(lat,lon);*/
+        
 
         nextPos = getPosition(fileData);
 
         if (areSameLocation(nextPos, prevPos)) reportInfo << "Position ignored: " << nextPos.toString() << endl;
         else {
-            /*
-            if (elementExists(fileContent,"name")) {
-                /*temp2 = getElement(temp,"name");
-                name = getElementContent(temp2);* //would it be better to have just name = getElement(temp,"name");
-                name = getElementContent(getElement(fileContent,"name"));
-            } else name = ""; // Fixed bug by adding this.*/
+            
             positions.push_back(nextPos);
             positionNames.push_back(addName(routePoint));
             reportInfo << "Position added: " << nextPos.toString() << endl;
