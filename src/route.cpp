@@ -346,51 +346,20 @@ Route::Route(std::string sourceFile, bool isFileName, metres granularity)
     source = getElementContent(temp); was changed to the code below as both do the smae thing*/
     string InGPX = getElementContent(getElement(InFile, "gpx"));
     if (! elementExists(InGPX,"rte")) throw domain_error("No 'rte' element.");
-    /*temp = getElement(source, "rte");
-    source = getElementContent(temp);*/
+
     string InRTE = getElementContent(getElement(InGPX, "rte"));
     if (elementExists(InRTE, "name")) {
-        /*temp = getAndEraseElement(source, "name");
-        routeName = getElementContent(temp);*/
         routeName = getElementContent(getAndEraseElement(InRTE, "name"));
         reportInfo << "Route name is: " << routeName << endl;
     }
 
 
-    string lat,lon,ele,name;//these variables were moved as they are only used from here on
+    //string lat,lon,ele,name;//these variables were moved as they are only used from here on
     if (! elementExists(InRTE,"rtept")) throw domain_error("No 'rtept' element.");
     string routePoint = getAndEraseElement(InRTE, "rtept");
 
     Position startPos = getPosition(routePoint);
 
-
-    /*if (! attributeExists(rteptSource,"lat")) throw domain_error("No 'lat' attribute.");
-    if (! attributeExists(rteptSource,"lon")) throw domain_error("No 'lon' attribute.");
-    lat = getElementAttribute(rteptSource, "lat");
-    lon = getElementAttribute(rteptSource, "lon");
-
-    string rteptData = "";
-    rteptData = getElementContent(rteptSource);
-    if (elementExists(rteptData, "ele")) {
-        /*temp2 = getElement(temp, "ele");
-        ele = getElementContent(temp2);* //would it be better to have just ele = getElement(temp,"ele");
-        ele = getElementContent(getElement(rteptData, "ele"));
-        Position startPos = Position(lat,lon,ele);
-        positions.push_back(startPos);
-        reportInfo << "Position added: " << startPos.toString() << endl;
-        ++posistionsAmount;
-    } else {
-        Position startPos = Position(lat,lon);
-        positions.push_back(startPos);
-        reportInfo << "Position added: " << startPos.toString() << endl;
-        ++posistionsAmount;
-    }*
-    if (elementExists(rteptData,"name")) {
-        /*temp2 = getElement(temp,"name");
-        name = getElementContent(temp2);* //would it be better to have just name = getElement(temp,"name");
-        name = getElementContent(getElement(rteptData,"name"));
-    }
-    positionNames.push_back(name);*/
 
     positions.push_back(startPos);
     reportInfo << "Position added: " << startPos.toString() << endl;
@@ -402,7 +371,11 @@ Route::Route(std::string sourceFile, bool isFileName, metres granularity)
 
     string fileData = "";
     while (elementExists(InRTE, "rtept")) {
+
         fileData = getAndEraseElement(InRTE, "rtept");
+
+        /*
+
         if (! attributeExists(fileData,"lat")) throw domain_error("No 'lat' attribute.");
         if (! attributeExists(fileData,"lon")) throw domain_error("No 'lon' attribute.");
         lat = getElementAttribute(fileData, "lat");
@@ -411,19 +384,23 @@ Route::Route(std::string sourceFile, bool isFileName, metres granularity)
         fileContent = getElementContent(fileData);
         if (elementExists(fileContent, "ele")) {
             /*temp2 = getElement(temp, "ele"); //would it be better to have just ele = getElement(temp,"ele");
-            ele = getElementContent(temp2);*/
+            ele = getElementContent(temp2);*
             ele = getElementContent(getElement(fileContent, "ele"));
             nextPos = Position(lat,lon,ele);
-        } else nextPos = Position(lat,lon);
+        } else nextPos = Position(lat,lon);*/
+
+        nextPos = getPosition(fileData);
+
         if (areSameLocation(nextPos, prevPos)) reportInfo << "Position ignored: " << nextPos.toString() << endl;
         else {
+            /*
             if (elementExists(fileContent,"name")) {
                 /*temp2 = getElement(temp,"name");
-                name = getElementContent(temp2);*/ //would it be better to have just name = getElement(temp,"name");
+                name = getElementContent(temp2);* //would it be better to have just name = getElement(temp,"name");
                 name = getElementContent(getElement(fileContent,"name"));
-            } else name = ""; // Fixed bug by adding this.
+            } else name = ""; // Fixed bug by adding this.*/
             positions.push_back(nextPos);
-            positionNames.push_back(name);
+            positionNames.push_back(addName(routePoint));
             reportInfo << "Position added: " << nextPos.toString() << endl;
             ++posistionsAmount;
             prevPos = nextPos;
@@ -441,7 +418,7 @@ Route::Route(std::string sourceFile, bool isFileName, metres granularity)
     report = reportInfo.str();
 }
 
-void Route::addName(std::string source)
+std::string Route::addName(std::string source)
 {
 
     std::string name = "";
@@ -455,7 +432,7 @@ void Route::addName(std::string source)
             }
             /**/
 
-    positionNames.push_back(name);
+    return name;
 
 }
 

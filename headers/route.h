@@ -95,7 +95,7 @@ namespace GPS
     protected:
       Route() {} // Only called by Track constructor.
       Position getPosition(std::string source); //only used in route constructor
-      void addName(std::string source);//only used in route constructor
+      std::string addName(std::string source);//only used in route constructor
 
       metres granularity;
 
