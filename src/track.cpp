@@ -257,7 +257,9 @@
 
         ++num;
 
-        temp = getElementContent(trackPosition);
+
+
+        /*temp = getElementContent(trackPosition);
 
         if (elementExists(temp,"name")) {
 
@@ -267,7 +269,9 @@
 
         }
 
-        positionNames.push_back(name);
+        positionNames.push_back(name);*/
+
+        addName(trackPosition);
 
         arrived.push_back(0);
 
@@ -332,13 +336,15 @@
 
             } else {
 
-                if (elementExists(temp,"name")) {
+                /*if (elementExists(temp,"name")) {
 
                     //temp2 = getElement(temp,"name");
 
                     name = getElementContent(getElement(temp,"name"));
 
-                } else name = ""; // Fixed bug by adding this.
+                } else name = ""; // Fixed bug by adding this.*/
+
+                addName(trackPosition);
 
                 positions.push_back(nextPos);
 
@@ -426,6 +432,25 @@
         std::string time = XML::Parser::getElementContent(XML::Parser::getElement(content,"time"));
 
         return stringToTime(time);
+
+    }
+
+    void Track::addName(std::string source)
+    {
+        std::string name = "";
+
+        std::string content = XML::Parser::getElementContent(source);
+
+        //this code is repeated
+        if (XML::Parser::elementExists(content,"name")) {
+
+
+
+            name = XML::Parser::getElementContent(XML::Parser::getElement(content,"name"));
+
+        }
+
+        positionNames.push_back(name);
 
     }
 
