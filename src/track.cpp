@@ -139,7 +139,7 @@
 
         seconds startTime, currentTime, timeElapsed;
 
-        ostringstream reportInfo,oss2;
+        ostringstream reportInfo,fileOutput;
 
         string InFile = "";
 
@@ -159,11 +159,11 @@
 
                 getline(fs, line);
 
-                oss2 << line << endl;
+                fileOutput << line << endl;
 
             }
 
-            InFile = oss2.str();
+            InFile = fileOutput.str();
 
         }
 
@@ -171,23 +171,25 @@
 
         //temp = getElement(source, "gpx");
 
-        string source = getElementContent(getElement(InFile, "gpx"));
+        string GPXData = getElementContent(getElement(InFile, "gpx"));
 
-        if (! elementExists(source,"trk")) throw domain_error("No 'trk' element.");
+        if (! elementExists(GPXData,"trk")) throw domain_error("No 'trk' element.");
 
         //temp = getElement(source, "trk");
 
-        source = getElementContent(getElement(source, "trk"));
+        string trackData = getElementContent(getElement(GPXData, "trk"));
 
-        if (elementExists(source, "name")) {
+        if (elementExists(trackData, "name")) {
 
             //temp = getAndEraseElement(source, "name");
 
-            routeName = getElementContent(getAndEraseElement(source, "name"));
+            routeName = getElementContent(getAndEraseElement(trackData, "name"));
 
             reportInfo << "Track name is: " << routeName << endl;
 
         }
+
+        string source = trackData;
 
         while (elementExists(source, "trkseg")) {
 
@@ -203,7 +205,7 @@
 
         if (! mergedTrkSegs.empty()) source = mergedTrkSegs;
 
-        unsigned int num = 0;
+        unsigned int numOfPositions = 0;
 
         if (! elementExists(source,"trkpt")) throw domain_error("No 'trkpt' element.");
 
@@ -211,43 +213,7 @@
 
 
 
-        /*temp = getAndEraseElement(source, "trkpt");
-
-        if (! attributeExists(temp,"lat")) throw domain_error("No 'lat' attribute.");
-
-        if (! attributeExists(temp,"lon")) throw domain_error("No 'lon' attribute.");
-
-        lat = getElementAttribute(temp, "lat");
-
-        lon = getElementAttribute(temp, "lon");
-
-        temp = getElementContent(temp);
-
-        if (elementExists(temp, "ele")) {
-
-            //temp2 = getElement(temp, "ele");
-
-            ele = getElementContent(getElement(temp, "ele"));
-
-            Position startPos = Position(lat,lon,ele);
-
-            positions.push_back(startPos);
-
-            reportInfo << "Start position added: " << startPos.toString() << endl;
-
-            ++num;
-
-        } else {
-
-            Position startPos = Position(lat,lon);
-
-            positions.push_back(startPos);
-
-            reportInfo << "Start position added: " << startPos.toString() << endl;
-
-            ++num;
-
-        }*/
+        /**/
 
         Position startPos = getPosition(trackPosition);
 
@@ -255,20 +221,11 @@
 
         reportInfo << "Start position added: " << startPos.toString() << endl;
 
-        ++num;
+        ++numOfPositions;
 
 
 
-        /*temp = getElementContent(trackPosition);
-
-        if (elementExists(temp,"name")) {
-
-            //temp2 = getElement(temp,"name");
-
-            name = getElementContent(getElement(temp,"name"));
-
-        }
-*/
+        /**/
         positionNames.push_back(addName(trackPosition));
 
 
@@ -277,13 +234,9 @@
 
         departed.push_back(0);
 
-        //if (! elementExists(temp,"time")) throw domain_error("No 'time' element.");
 
-        //temp2 = getElement(temp,"time");
 
-        //time = getElementContent(getElement(temp,"time"));
-
-        startTime = currentTime = getTime(trackPosition);//stringToTime(time);
+        startTime = currentTime = getTime(trackPosition);
 
         Position prevPos = positions.back(), nextPos = positions.back();
 
@@ -291,38 +244,10 @@
 
             string trackPosition = getAndEraseElement(source, "trkpt");
 
-            /*temp = getAndEraseElement(source, "trkpt");
-
-
-            if (! attributeExists(temp,"lat")) throw domain_error("No 'lat' attribute.");
-
-            if (! attributeExists(temp,"lon")) throw domain_error("No 'lon' attribute.");
-
-            lat = getElementAttribute(temp, "lat");
-
-            lon = getElementAttribute(temp, "lon");
-
-            temp = getElementContent(temp);
-
-            if (elementExists(temp, "ele")) {
-
-                //temp2 = getElement(temp, "ele");
-
-                ele = getElementContent(getElement(temp, "ele"));
-
-                nextPos = Position(lat,lon,ele);
-
-            } else nextPos = Position(lat,lon);*/
+            /**/
 
             nextPos = getPosition(trackPosition);
 
-            //temp = getElementContent(trackPosition);
-
-            //if (! elementExists(temp,"time")) throw domain_error("No 'time' element.");
-
-            //temp2 = getElement(temp,"time");
-
-            //time = getElementContent(getElement(temp,"time"));
 
             currentTime = getTime(trackPosition);//stringToTime(time);
 
@@ -335,14 +260,6 @@
                 reportInfo << "Position ignored: " << nextPos.toString() << endl;
 
             } else {
-
-                /*if (elementExists(temp,"name")) {
-
-                    //temp2 = getElement(temp,"name");
-
-                    name = getElementContent(getElement(temp,"name"));
-
-                } else name = ""; // Fixed bug by adding this.*/
 
 
 
@@ -360,7 +277,7 @@
 
                 reportInfo << " at time: " << to_string(timeElapsed) << endl;
 
-                ++num;
+                ++numOfPositions;
 
                 prevPos = nextPos;
 
@@ -368,13 +285,13 @@
 
         }
 
-        reportInfo << num << " positions added." << endl;
+        reportInfo << numOfPositions << " positions added." << endl;
 
         routeLength = 0;
 
         metres flatDistance, elevationBetweenPoints;
 
-        for (unsigned int i = 1; i < num; ++i ) {
+        for (unsigned int i = 1; i < numOfPositions; ++i ) {
 
             flatDistance = distanceBetween(positions[i-1], positions[i]);
 
@@ -388,7 +305,7 @@
 
     }
 
-    Position Track::getPosition(string source)
+    Position Track::getPosition(std::string source)
     {
 
 
